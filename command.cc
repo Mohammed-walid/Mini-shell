@@ -28,7 +28,6 @@
 #include "command.h"
 #include "tokenizer.h"
 
-// Added: Signal handler for logging terminated child processes
 void sigchld_handler(int sig) {
     FILE *logFile = fopen("shell.log", "a");
     if (logFile) {
@@ -44,7 +43,6 @@ void parse(std::vector<Token> &tokens)
     Command currentCommand;
     SimpleCommand *currentSimpleCommand = new SimpleCommand();
 
-    // Added: Parsing logic to build currentCommand before it executes
     for (size_t i = 0; i < tokens.size(); i++) {
         Token token = tokens[i];
         if (token.type == TOKEN_COMMAND || token.type == TOKEN_ARGUMENT) {
@@ -137,7 +135,6 @@ Command::Command()
     _simpleCommands = (SimpleCommand **)
         malloc(_numberOfSimpleCommands * sizeof(SimpleCommand *));
         
-    // Added: Realloc fix to prevent the malloc(0) crash without changing the original line above
     _simpleCommands = (SimpleCommand **)realloc(_simpleCommands, _numberOfAvailableSimpleCommands * sizeof(SimpleCommand *));
 
     _numberOfSimpleCommands = 0;
@@ -146,7 +143,6 @@ Command::Command()
     _errFile = 0;
     _background = 0;
     
-    // Added: Missing variable initializations
     _append = 0;
     _out_error = 0;
 }
@@ -198,7 +194,6 @@ void Command::clear()
     _errFile = 0;
     _background = 0;
     
-    // Added: Reset missing variables
     _append = 0;
     _out_error = 0;
 }
@@ -218,7 +213,6 @@ void Command::print()
         {
             printf("\"%s\" \t", _simpleCommands[i]->_arguments[j]);
         }
-        // Added: Newline to fix formatting
         printf("\n"); 
     }
 
@@ -238,7 +232,6 @@ void Command::execute()
         Write your code here
     */
     
-    // Added: Command execution logic 
     if (_numberOfSimpleCommands > 0) {
         if (strcmp(_simpleCommands[0]->_arguments[0], "exit") == 0) {
             printf("Good bye!!\n");
@@ -327,8 +320,6 @@ void Command::execute()
         }
     }
     
-    // Added: A return to safely exit the function and bypass the infinite 
-    // recursive crash caused by the original clear() and prompt() calls below.
     clear();
     return;
 
@@ -345,7 +336,6 @@ void Command::prompt()
     {
         std::getline(std::cin, input); 
         
-        // Added: EOF and empty input safety checks
         if (std::cin.eof()) exit(0);
         if (input.empty()) {
             printf("myshell>");
@@ -356,7 +346,6 @@ void Command::prompt()
         std::vector<Token> tokens = tokenize(input);
         parse(tokens);
         
-        // Added: Reprint prompt for the loop iteration
         printf("myshell>");
         fflush(stdout);
     }
@@ -367,7 +356,6 @@ SimpleCommand *Command::_currentSimpleCommand;
 
 int main()
 {
-    // Added: Signal setup
     signal(SIGINT, SIG_IGN);
     struct sigaction sa;
     sa.sa_handler = sigchld_handler;
